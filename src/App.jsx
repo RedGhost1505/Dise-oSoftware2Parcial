@@ -1,34 +1,38 @@
-import { Button, Box, Flex, Text, Tooltip, useToast } from '@chakra-ui/react';
+import {
+  Button, Box, Flex, Text, Tooltip, Drawer,
+  DrawerBody,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerOverlay,
+  DrawerContent,
+  DrawerCloseButton,
+} from "@chakra-ui/react";
 import { GrRestaurant } from "react-icons/gr";
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 
 function App() {
-
   const [menuItems, setMenuItems] = useState([]);
   const [selectedItems, setSelectedItems] = useState([]);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false); // Estado para el drawer
 
   const obtainMenu = async () => {
     try {
       const response = await axios.get('https://api-menu-9b5g.onrender.com/menu');
-      console.log(response.data);
       setMenuItems(response.data);
     } catch (error) {
       console.error(error);
     }
-  }
+  };
 
   const handleItemClick = (item) => {
-    // Comprobar si el ítem ya está seleccionado
     const existingItem = selectedItems.find(selectedItem => selectedItem.id === item.id);
     if (existingItem) {
-      // Si el ítem ya existe, solo sumamos su precio
       const updatedItems = selectedItems.map(selectedItem =>
         selectedItem.id === item.id ? { ...selectedItem, price: selectedItem.price + item.price } : selectedItem
       );
       setSelectedItems(updatedItems);
     } else {
-      // Si el ítem no existe, lo agregamos al array
       setSelectedItems([...selectedItems, item]);
     }
   };
@@ -39,10 +43,16 @@ function App() {
 
   const total = selectedItems.reduce((acc, item) => acc + item.price, 0).toFixed(2);
 
+  const handleCheckout = () => {
+    // Aquí puedes procesar el pago o la orden
+    setIsDrawerOpen(true); // Abre el drawer
+    setSelectedItems([]); // Limpia los items seleccionados
+  };
+
   return (
     <>
       <Flex direction="column" minH="100vh" px="40px" minW="100vw" bg="gray.200">
-        <Flex driection="row" pt="20px" justify="space-between">
+        <Flex direction="row" pt="20px" justify="space-between">
           <GrRestaurant size="70px" />
           <Box fontSize="4xl" fontWeight="bold">FoodAPI</Box>
         </Flex>
@@ -58,14 +68,13 @@ function App() {
                 {menuItems.map((item) => (
                   <Tooltip key={item.id} label={item.description} aria-label='A tooltip'>
                     <Button
-                      key={item.id}
                       borderRadius="10px"
                       _hover={{ bg: "green.400" }}
                       bg="white"
                       p="10px"
-                      width="auto"  // Hace que cada botón ocupe el 100% del ancho
-                      size="lg"  // Tamaño pequeño
-                      onClick={() => handleItemClick(item)}  // Agrega el item al array de items seleccionados
+                      width="auto"
+                      size="lg"
+                      onClick={() => handleItemClick(item)}
                     >
                       {item.name}
                     </Button>
@@ -74,7 +83,7 @@ function App() {
               </Flex>
             </Flex>
 
-            {/* Segundo Flex - rojo */}
+            {/* Segundo Flex - resumen */}
             <Flex bg="white" flex="1" direction="column" borderRadius="inherit" maxW="400px">
               <Text fontWeight="bold" fontSize="2xl" pl="20px" pt="20px">
                 Your summary
@@ -90,7 +99,7 @@ function App() {
                 )}
                 <Flex mt="auto" direction="column">
                   <Text fontSize="lg" fontWeight="bold" mt="4">Total: ${total}</Text>
-                  <Button mt="20px" colorScheme="green" size="lg">
+                  <Button mt="20px" colorScheme="green" size="lg" onClick={handleCheckout}>
                     Checkout
                   </Button>
                 </Flex>
@@ -98,9 +107,30 @@ function App() {
             </Flex>
           </Flex>
         </Flex>
+
+        {/* Drawer para mostrar la confirmación de orden */}
+        <Drawer isOpen={isDrawerOpen} placement="bottom" onClose={() => setIsDrawerOpen(false)}>
+          <DrawerOverlay />
+          <DrawerContent>
+            <DrawerCloseButton />
+            <DrawerHeader>Your Order is Being Processed</DrawerHeader>
+
+            <DrawerBody>
+              <Text>Your order has been placed successfully!</Text>
+              <Text mt={4}>Thank you for your order!</Text>
+              <Text mt={4}>Total: ${total}</Text>
+            </DrawerBody>
+
+            <DrawerFooter>
+              <Button colorScheme="blue" onClick={() => setIsDrawerOpen(false)}>
+                Close
+              </Button>
+            </DrawerFooter>
+          </DrawerContent>
+        </Drawer>
       </Flex >
     </>
-  )
+  );
 }
 
-export default App
+export default App;
