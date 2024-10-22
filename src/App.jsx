@@ -6,15 +6,19 @@ import {
   DrawerOverlay,
   DrawerContent,
   DrawerCloseButton,
+  Icon,
+  useToast,
 } from "@chakra-ui/react";
 import { GrRestaurant } from "react-icons/gr";
 import axios from 'axios';
 import { useEffect, useState } from 'react';
+import { FaCheckCircle } from "react-icons/fa";
 
 function App() {
   const [menuItems, setMenuItems] = useState([]);
   const [selectedItems, setSelectedItems] = useState([]);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false); // Estado para el drawer
+  const toast = useToast();
 
   const obtainMenu = async () => {
     try {
@@ -32,8 +36,22 @@ function App() {
         selectedItem.id === item.id ? { ...selectedItem, price: selectedItem.price + item.price } : selectedItem
       );
       setSelectedItems(updatedItems);
+      toast({
+        title: "Item added",
+        description: `The item ${item.name} has been added to your order`,
+        status: "info",
+        duration: 3000,
+        isClosable: true,
+      });
     } else {
       setSelectedItems([...selectedItems, item]);
+      toast({
+        title: "Item added",
+        description: `The item ${item.name} has been added to your order`,
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
     }
   };
 
@@ -46,7 +64,7 @@ function App() {
   const handleCheckout = () => {
     // Aquí puedes procesar el pago o la orden
     setIsDrawerOpen(true); // Abre el drawer
-    setSelectedItems([]); // Limpia los items seleccionados
+
   };
 
   const handleRemoveItem = (itemId) => {
@@ -121,15 +139,20 @@ function App() {
             borderRadius="10px" // Bordes redondeados
           >
             <DrawerCloseButton />
-            <DrawerHeader>Your Order is Being Processed</DrawerHeader>
+            <DrawerHeader>
+              <Flex align="center" justify="center">
+                <Icon as={FaCheckCircle} w={8} h={8} color="green.500" mr={2} />
+                <Text fontWeight="bold" fontSize="lg">Order Confirmed</Text>
+              </Flex>
+            </DrawerHeader>
 
-            <DrawerBody>
-              <Text>Your order has been placed successfully!</Text>
-              <Text mt={4}>Thank you for your order!</Text>
-              <Text mt={4}>Total: ${total}</Text>
+            <DrawerBody textAlign="center">
+              <Text fontSize="md">Your order has been placed successfully!</Text>
+              <Text mt={4} fontSize="md">Thank you for your order!</Text>
+              <Text mt={4} fontWeight="bold" fontSize="lg">Total: ${total}</Text>
             </DrawerBody>
 
-            <DrawerFooter>
+            <DrawerFooter justifyContent="center">
               <Button colorScheme="blue" onClick={() => setIsDrawerOpen(false)}>
                 Close
               </Button>
