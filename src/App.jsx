@@ -49,6 +49,10 @@ function App() {
     setSelectedItems([]); // Limpia los items seleccionados
   };
 
+  const handleRemoveItem = (itemId) => {
+    setSelectedItems(selectedItems.filter(item => item.id !== itemId));
+  };
+
   return (
     <>
       <Flex direction="column" minH="100vh" px="40px" minW="100vw" bg="gray.200">
@@ -92,7 +96,7 @@ function App() {
                 {/* Mostrar ítems seleccionados */}
                 {selectedItems.length > 0 ? (
                   selectedItems.map((item, index) => (
-                    <Text key={index} fontSize="lg">{item.name} - ${item.price.toFixed(2)}</Text>
+                    <Text key={index} fontSize="lg" onClick={() => handleRemoveItem(item.id)} cursor="pointer">{item.name} - ${item.price.toFixed(2)}</Text>
                   ))
                 ) : (
                   <Text fontSize="lg">No items selected</Text>
@@ -111,7 +115,11 @@ function App() {
         {/* Drawer para mostrar la confirmación de orden */}
         <Drawer isOpen={isDrawerOpen} placement="bottom" onClose={() => setIsDrawerOpen(false)}>
           <DrawerOverlay />
-          <DrawerContent>
+          <DrawerContent
+            maxW="300px" // Limitar el ancho máximo a 300px
+            mx="auto" // Centrar horizontalmente
+            borderRadius="10px" // Bordes redondeados
+          >
             <DrawerCloseButton />
             <DrawerHeader>Your Order is Being Processed</DrawerHeader>
 
