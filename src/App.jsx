@@ -13,6 +13,7 @@ import { GrRestaurant } from "react-icons/gr";
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { FaCheckCircle } from "react-icons/fa";
+import { obtainMenu } from './services/apiLogic';
 
 function App() {
   const [menuItems, setMenuItems] = useState([]);
@@ -20,14 +21,18 @@ function App() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false); // Estado para el drawer
   const toast = useToast();
 
-  const obtainMenu = async () => {
-    try {
-      const response = await axios.get('https://api-menu-9b5g.onrender.com/menu');
-      setMenuItems(response.data);
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  // const obtainMenu = async () => {
+  //   try {
+  //     const response = await axios.get('https://api-menu-9b5g.onrender.com/menu');
+  //     setMenuItems(response.data);
+  //   } catch (error) {
+  //     console.error(error);
+  //   }
+  // };
+
+  obtainMenu().then((data) => {
+    setMenuItems(data);
+  });
 
   const handleItemClick = (item) => {
     const existingItem = selectedItems.find(selectedItem => selectedItem.id === item.id);
