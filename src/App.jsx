@@ -14,6 +14,7 @@ import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { FaCheckCircle } from "react-icons/fa";
 import { obtainMenu } from './services/apiLogic';
+import { uploadOrderToFirestore } from './services/apiLogic';
 
 function App() {
   const [menuItems, setMenuItems] = useState([]);
@@ -66,11 +67,54 @@ function App() {
 
   const total = selectedItems.reduce((acc, item) => acc + item.price, 0).toFixed(2);
 
-  const handleCheckout = () => {
-    // Aquí puedes procesar el pago o la orden
-    setIsDrawerOpen(true); // Abre el drawer
+  const handleCheckout = async () => {
+    if (selectedItems.length === 0) {
+      toast({
+        title: "No items selected",
+        description: "Please select at least one item before checking out",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    } else {
+      try {
+        // Crear un arreglo con el formato adecuado para subir a Firestore
+        const items = selectedItems.map(item => ({
+          name: item.name,
+          price: item.price
+        }));
 
+        // Subir la orden a Firestore
+        const orderId = await uploadOrderToFirestore(items, total);
+        console.log('Orden subida correctamente con ID:', orderId);
+
+        toast({
+          title: "Order Confirmed",
+          description: `Your order has been placed successfully.`,
+          status: "success",
+          duration: 5000,
+          isClosable: true,
+        });
+
+      } catch (error) {
+        console.error('Error al subir la orden a Firestore:', error);
+
+        toast({
+          title: "Error",
+          description: "There was an issue placing your order. Please try again.",
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+        });
+
+      } finally {
+        // Mostrar el drawer
+        setIsDrawerOpen(true);
+      }
+    }
   };
+
 
   const handleRemoveItem = (itemId) => {
     setSelectedItems(selectedItems.filter(item => item.id !== itemId));
