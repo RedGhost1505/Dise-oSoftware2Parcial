@@ -1,6 +1,7 @@
 import axios from 'axios';
-import { addDoc, collection } from 'firebase/firestore';
-import { db } from './firebaseConfig'; // Asegúrate de que la ruta sea correcta
+import { addDoc, collection, getDocs } from 'firebase/firestore';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { auth, db } from './firebaseConfig'; // Asegúrate de que la ruta sea correcta
 
 
 export const obtainMenu = async () => {
@@ -9,6 +10,19 @@ export const obtainMenu = async () => {
         return response.data;
     } catch (error) {
         console.error(error);
+    }
+};
+
+// Get all orders from Firestore
+export const getOrdersFromFirestore = async () => {
+    try {
+        const ordersCollection = collection(db, 'orders');
+        const ordersSnapshot = await getDocs(ordersCollection); // Cambia .get() a getDocs()
+        const ordersList = ordersSnapshot.docs.map(doc => doc.data());
+        return ordersList;
+    } catch (error) {
+        console.error('Error al obtener las órdenes de Firestore:', error);
+        throw error;
     }
 };
 
